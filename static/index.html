@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+  <script src="https://mucfpga.github.io/codeEdit/min/vs/loader.js"></script>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 500000px;
+    }
+
+    #box {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div align="center" style="margin:20px">
+    <button id="btn" align="center" type="button" class="btn btn-success btn-lg btn-block">Run</button>
+  </div>
+
+  <div id="box">
+  </div>
+
+
+
+</body>
+
+</html>
+
+<script>
+  function ming_alert(str) {
+    btn.innerHTML = str;
+    //设置关闭时间  
+    window.setTimeout(() => {
+      btn.innerHTML = "Run";
+    }, 500);
+  }
+
+
+  M = {};
+  M.fun=localStorage.fun;
+  if(!M.fun){
+    M.fun=      `
+              app.get("/getById",(req,res)=>{ 
+                    console.log(req.params);
+                    res.send("ok");
+              })
+                `
+  }
+
+
+  btn.onclick = function () {
+
+    let fun = M.editor.getValue();
+    localStorage.fun=fun;
+    $.ajax({
+             type: "post",
+             url: "/_run_",
+             data: {fun},
+             dataType: "json",
+             success: function(data){
+                  ming_alert(JSON.stringify(data));       
+              },
+              error:function(e){
+                ming_alert(JSON.stringify(e));
+              }
+    });
+
+
+  }
+
+  require.config({
+    baseUrl: 'https://mucfpga.github.io/codeEdit/', paths: { 'vs': 'min/vs' }
+  });
+
+  require(['vs/editor/editor.main'], function () {
+    var editor = monaco.editor.create(document.getElementById('box'), {
+      value: [
+          M.fun
+      ].join('\n'),
+      language: 'javascript',
+      theme: 'vs-dark',
+      automaticLayout: true,
+      scrollbar: {
+        useShadows: false,
+        vertical: 'visible',
+        horizontal: 'visible',
+        horizontalSliderSize: 5,
+        verticalSliderSize: 5,
+        horizontalScrollbarSize: 15,
+        verticalScrollbarSize: 15,
+      },
+      quickSuggestions: true,
+      overviewRulerBorder: true,
+      minimap: {
+        enabled: false
+      }
+    });
+
+    M.editor = editor;
+  });
+</script>
+
+
+
+</script>
